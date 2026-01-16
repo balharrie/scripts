@@ -178,7 +178,7 @@ while IFS= read -r line; do
         fi
 
         chap_index=$((i+1))
-        chap_filename=$(printf "%02d_track_(%s).%s" "$chap_index" "$ch_label" "$ext")
+        chap_filename=$(printf "%02d_track_%s_(%s).%s" "$chap_index" "$tid" "$ch_label" "$ext")
         OUTFILE="${OUTDIR}/${chap_filename}"
 
         echo "  Chapter $chap_index: start=$START end=${END:-end-of-file}"
