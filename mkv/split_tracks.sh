@@ -36,6 +36,15 @@ BASENAME_NOEXT="${BASENAME%.*}"
 
 echo "Input file: $INPUT"
 
+# Extract `t` and `z` numbers from the input basename if present.
+# Example basename: "..._t01 ... _track_2" -> t_num=1, z_num=2
+t_num=0
+z_num=0
+if [[ "$BASENAME_NOEXT" =~ _t([0-9]+) ]]; then
+    # remove leading zeros safely
+    t_num=$((10#${BASH_REMATCH[1]}))
+fi
+
 ########################################
 # Extract chapters and build timestamp array
 ########################################
@@ -160,6 +169,13 @@ while IFS= read -r line; do
     OUTDIR="${BASENAME_NOEXT}_track_${tid}"
     mkdir -p "$OUTDIR"
 
+    # Determine z_num as the trailing number of the output directory (fallback to tid)
+    if [[ "$OUTDIR" =~ _([0-9]+)$ ]]; then
+        z_num=$((10#${BASH_REMATCH[1]}))
+    else
+        z_num=$((10#$tid))
+    fi
+
     echo "----------------------------------------"
     echo "Track ID:     $tid"
     echo "Codec:        $codec"
@@ -178,7 +194,7 @@ while IFS= read -r line; do
         fi
 
         chap_index=$((i+1))
-        chap_filename=$(printf "%02d_t%02d_(%s).%s" "$chap_index" "$tid" "$ch_label" "$ext")
+        chap_filename=$(printf "%02d_t%02d_z%02d_(%s).%s" "$chap_index" "$t_num" "$z_num" "$ch_label" "$ext")
         OUTFILE="${OUTDIR}/${chap_filename}"
 
         echo "  Chapter $chap_index: start=$START end=${END:-end-of-file}"
