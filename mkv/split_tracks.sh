@@ -70,7 +70,7 @@ echo "Found $NUM_CHAPTERS chapters"
 if [[ "$NUM_CHAPTERS" -eq 0 ]]; then
     echo "No chapters found. Exiting."
     rm -f "$CHAPTER_FILE"
-    exit 1
+    exit 0
 fi
 
 ########################################
