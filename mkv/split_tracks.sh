@@ -1,13 +1,24 @@
 #!/opt/homebrew/bin/bash
 
-# Usage: ./split_audio_tracks.sh "input.mkv"
+# Usage: ./split_audio_tracks.sh [--dry-run|-n] "input.mkv"
 
 set -u
+
+# Parse options: support --dry-run|-n
+DRY_RUN=0
+while [[ "${1:-}" =~ ^- && ! "${1:-}" == "--" ]]; do
+    case "$1" in
+        --dry-run|-n) DRY_RUN=1; shift ;;
+        --help|-h) echo "Usage: $0 [--dry-run|-n] input.mkv"; exit 0 ;;
+        *) echo "Unknown option: $1" >&2; exit 2 ;;
+    esac
+done
+if [[ "${1:-}" == "--" ]]; then shift; fi
 
 INPUT="${1:-}"
 
 if [[ -z "$INPUT" ]]; then
-    echo "Usage: $0 input.mkv"
+    echo "Usage: $0 [--dry-run|-n] input.mkv"
     exit 1
 fi
 
@@ -68,9 +79,10 @@ NUM_CHAPTERS=${#CHAPTER_STARTS[@]}
 echo "Found $NUM_CHAPTERS chapters"
 
 if [[ "$NUM_CHAPTERS" -eq 0 ]]; then
-    echo "No chapters found. Exiting."
-    rm -f "$CHAPTER_FILE"
-    exit 0
+    echo "No chapters found — will export whole tracks as single files."
+    # Use a single-start at 00:00:00 so extraction exports the full track
+    CHAPTER_STARTS=("00:00:00")
+    NUM_CHAPTERS=1
 fi
 
 ########################################
